@@ -13,19 +13,39 @@ agent decisions enforceable on-chain.
 
 | Program | Path | What it is |
 | --- | --- | --- |
-| `fractionax` | `programs/fractionax` | Program registry (M1 scaffold). Extended in M2 with RWA vaults, SPL minting, an investor registry, and yield distribution. |
+| `fractionax` | `programs/fractionax` | Singleton `Registry` PDA (seeds `["registry"]`) tracking the admin authority and an on-chain deal count, with `initialize` and `register_deal` instructions. Extended in M2 with RWA vaults, SPL minting, an investor registry, and yield distribution. |
 
-The TypeScript client (`@fractionax/solana` in the meta-repo) consumes this
-program's ID and IDL once deployed.
+The TypeScript client (`@fractionax/solana` in the meta-repo) derives the
+`Registry` PDA and reads it; the web app surfaces it at `/onchain`.
 
-## Develop
+## Deploy to devnet
 
 ```bash
 # Prerequisites: Rust, the Solana CLI, and Anchor 0.31.1 (via avm).
-anchor build           # compile the program + generate the IDL
-anchor keys sync       # set the real program IDs before the first deploy
-anchor deploy --provider.cluster devnet
+solana-keygen new                       # once, if you have no wallet
+solana config set --url devnet
+solana airdrop 2                         # fund the deployer
+
+anchor build                             # compile + generate the IDL
+anchor keys sync                         # write the real program id into
+                                         # declare_id! and Anchor.toml
+anchor build                             # rebuild with the synced id
+anchor deploy --provider.cluster devnet  # deploy the program
+
+# Initialize the singleton Registry PDA (one-time). With the IDL from
+# `anchor build`, call the `initialize` instruction — e.g. via `anchor test`,
+# an `anchor run` script, or @coral-xyz/anchor:
+#   program.methods.initialize().rpc()
 ```
 
-> The program IDs in `Anchor.toml` and `declare_id!` are placeholders (the System
-> Program address) until `anchor keys sync` is run.
+Then point the meta-repo at the deployed program so the web `/onchain` view and
+`@fractionax/solana` read it live:
+
+```bash
+# in the meta-repo (e.g. apps/web/.env.local)
+FRACTIONAX_PROGRAM_ID=<the id printed by `anchor keys sync`>
+SOLANA_RPC_URL=https://api.devnet.solana.com   # or a private devnet RPC
+```
+
+Until then the program id stays the placeholder (System Program address) and the
+`/onchain` page shows a "not deployed" state.
