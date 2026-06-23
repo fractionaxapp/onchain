@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Self-contained Anchor build — no monorepo reconstruction needed; the Solana
+# program compiles on its own toolchain (Rust + Solana CLI + Anchor).
+jobs:
+  build:
+    name: Anchor build
+    runs-on: ubuntu-latest
+    env:
+      ANCHOR_VERSION: "0.31.1"
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo + target
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: anchor-${{ runner.os }}-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            anchor-${{ runner.os }}-
+
+      - name: Check formatting
+        run: cargo fmt --all --check
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+
+      - name: Install Anchor CLI
+        run: cargo install --git https://github.com/coral-xyz/anchor --tag "v${ANCHOR_VERSION}" anchor-cli --locked
+
+      - name: Anchor build
+        run: anchor build
