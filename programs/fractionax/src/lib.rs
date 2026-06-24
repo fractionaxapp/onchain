@@ -1,8 +1,8 @@
 use anchor_lang::prelude::*;
 
-// Placeholder program ID (System Program address). Run `anchor keys sync`
-// after the first build to replace it with the keypair-derived ID.
-declare_id!("11111111111111111111111111111111");
+// Program ID of the devnet deployment (set by `anchor keys sync`). For a new
+// cluster/keypair, run `anchor keys sync` again after `anchor build`.
+declare_id!("Aqvk9Br2PPoTzGZbnYVxnwgpGTzPZTdcowpN9gdkRXGP");
 
 /// Fractionax on-chain program.
 ///

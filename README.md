@@ -18,6 +18,16 @@ agent decisions enforceable on-chain.
 The TypeScript client (`@fractionax/solana` in the meta-repo) derives the
 `Registry` PDA and reads it; the web app surfaces it at `/onchain`.
 
+## Deployed (devnet)
+
+| | Address |
+| --- | --- |
+| Program | [`Aqvk9Br2PPoTzGZbnYVxnwgpGTzPZTdcowpN9gdkRXGP`](https://explorer.solana.com/address/Aqvk9Br2PPoTzGZbnYVxnwgpGTzPZTdcowpN9gdkRXGP?cluster=devnet) |
+| Registry PDA | [`BKXd6X1Mg2Ab26bk4RLnNTqps4r2fjcbjj5FaKou7CSe`](https://explorer.solana.com/address/BKXd6X1Mg2Ab26bk4RLnNTqps4r2fjcbjj5FaKou7CSe?cluster=devnet) |
+
+`@fractionax/solana` defaults to this program ID, so the web `/onchain` view reads
+it live. Override with `FRACTIONAX_PROGRAM_ID` for a different deployment.
+
 ## Deploy to devnet
 
 ```bash
