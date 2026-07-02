@@ -87,10 +87,7 @@ pub mod fractionax {
     /// invest or secondary-transfer instruction requires this (directly or via CPI)
     /// before moving value — this is how off-chain compliance becomes enforceable
     /// on-chain. `require_accredited` demands accreditation (e.g. Reg D / high-risk).
-    pub fn assert_compliant(
-        ctx: Context<AssertCompliant>,
-        require_accredited: bool,
-    ) -> Result<()> {
+    pub fn assert_compliant(ctx: Context<AssertCompliant>, require_accredited: bool) -> Result<()> {
         check_credential(&ctx.accounts.credential, require_accredited)?;
         emit!(ComplianceAsserted {
             wallet: ctx.accounts.credential.wallet,
@@ -107,7 +104,10 @@ fn check_credential(credential: &InvestorCredential, require_accredited: bool) -
     require!(credential.kyc_verified, FractionaxError::KycNotVerified);
     require!(credential.sanctions_clear, FractionaxError::SanctionsHit);
     if require_accredited {
-        require!(credential.accredited, FractionaxError::AccreditationRequired);
+        require!(
+            credential.accredited,
+            FractionaxError::AccreditationRequired
+        );
     }
     Ok(())
 }
